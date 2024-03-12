@@ -9,7 +9,7 @@ Neste README, vou abordar as melhores práticas de segurança que devem ser impl
 
   
 
-1\. Prevenção contra Injeção de SQL
+## 1 Prevenção contra Injeção de SQL
 -----------------------------------
 
   
@@ -22,11 +22,24 @@ A injeção de SQL é uma técnica de ataque na qual um invasor insere código S
 
   
 
-php
+```php
 
   
 
-`// Conexão com o banco de dados (exemplo usando PDO) $pdo = new PDO('mysql:host=localhost;dbname=nomedobanco', 'usuario', 'senha');  // Dados do formulário $username = $_POST['username']; $password = $_POST['password'];  // Consulta preparada $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE username = :username AND password = :password'); $stmt->execute(['username' => $username, 'password' => $password]);  // Verifica se o usuário existe $user = $stmt->fetch(PDO::FETCH_ASSOC); if ($user) {     // Usuário autenticado } else {     // Erro de autenticação }`
+$pdo = new PDO('mysql:host=localhost;dbname=nomedobanco', 'usuario', 'senha');
+
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$stmt = $pdo->prepare('SELECT * FROM usuarios WHERE username = :username AND password = :password');
+$stmt->execute(['username' => $username, 'password' => $password]);
+
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+if ($user) {
+    // Usuário autenticado
+} else {
+    // Erro de autenticação
+}
 
   
 
