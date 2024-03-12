@@ -1,6 +1,6 @@
   
 
-README: Melhores Práticas de Segurança para Sistema de Autenticação em PHP
+Melhores Práticas de Segurança para Sistema de Autenticação em PHP
 ==========================================================================
 
   
@@ -40,11 +40,11 @@ if ($user) {
 } else {
     // Erro de autenticação
 }
-
+```
   
 
-2\. Prevenção contra Cross-Site Scripting (XSS)
------------------------------------------------
+## 2. Prevenção contra Cross-Site Scripting (XSS)
+
 
   
 
@@ -56,15 +56,24 @@ XSS é um tipo de ataque em que um invasor injeta scripts maliciosos em páginas
 
   
 
-php
+```php
 
   
+// Dados do formulário
+$comment = $_POST['comment'];
 
-`// Dados do formulário $comment = $_POST['comment'];  // Sanitiza e escapa os dados $comment = htmlspecialchars($comment, ENT_QUOTES, 'UTF-8');  // Insere o comentário no banco de dados // Aqui você deve usar prepared statements como no exemplo anterior  // Exibir o comentário em uma página echo "<div>$comment</div>";`
+// Sanitiza e escapa os dados
+$comment = htmlspecialchars($comment, ENT_QUOTES, 'UTF-8');
 
-  
+// Insere o comentário no banco de dados
+// Aqui você deve usar prepared statements como no exemplo anterior
 
-3\. Prevenção contra Cross-Site Request Forgery (CSRF)
+// Exibir o comentário em uma página
+echo "<div>$comment</div>";
+
+```
+
+## 3. Prevenção contra Cross-Site Request Forgery (CSRF)
 ------------------------------------------------------
 
   
@@ -77,21 +86,80 @@ CSRF é um ataque em que um invasor faz com que um usuário autenticado execute 
 
   
 
-php
+```php
 
-  
+session_start();
 
-`session_start();  // Gera um token CSRF e armazena na sessão if (!isset($_SESSION['csrf_token'])) {     $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); }  // Verifica se o token enviado é válido if (isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']) {     // Token válido, processa o formulário     // Lembre-se de destruir o token após o uso para evitar reutilização     unset($_SESSION['csrf_token']); } else {     // Token inválido, rejeita o formulário     // Ou pode-se registrar um log, dependendo da política de segurança }`
+// Gera um token CSRF e armazena na sessão
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
-  
+// Verifica se o token enviado é válido
+if (isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']) {
+    // Token válido, processa o formulário
+    // Lembre-se de destruir o token após o uso para evitar reutilização
+    unset($_SESSION['csrf_token']);
+} else {
+    // Token inválido, rejeita o formulário
+    // Ou pode-se registrar um log, dependendo da política de segurança
+}
 
-Conclusão
----------
+```
+## Exemplo de Implementação de Autenticação:
 
-  
+Aqui está um exemplo simplificado de como você poderia implementar um formulário de login seguro seguindo as práticas mencionadas acima:
 
-Ao implementar um sistema de autenticação em PHP, é crucial seguir as melhores práticas de segurança para proteger contra ataques comuns. As práticas mencionadas acima, como o uso de prepared statements para prevenir injeção de SQL, a sanitização de dados para prevenir XSS e o uso de tokens CSRF para prevenir CSRF, ajudarão a fortalecer a segurança de seu sistema.
 
-  
+```php
 
-É importante ressaltar que a segurança é um processo contínuo e evolutivo. Além dessas práticas, sempre mantenha seu sistema e bibliotecas atualizados, faça testes de segurança regulares e siga as diretrizes de segurança do PHP e do OWASP (Open Web Application Security Project).
+session_start();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Verificar o token CSRF
+    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die("Erro de CSRF!");
+    }
+
+    // Conectar ao banco de dados
+    $conexao = new PDO("mysql:host=localhost;dbname=nome_do_banco", "usuario", "senha");
+
+    // Sanitize e validar entrada
+    $username = htmlspecialchars($_POST['username']);
+    $senha = htmlspecialchars($_POST['senha']);
+
+    // Preparar e executar a consulta
+    $stmt = $conexao->prepare("SELECT * FROM usuarios WHERE username = :username AND senha = :senha");
+    $stmt->execute([':username' => $username, ':senha' => $senha]);
+
+    // Verificar se o usuário existe
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($usuario) {
+        // Autenticação bem-sucedida
+        $_SESSION['usuario'] = $usuario;
+        header("Location: dashboard.php");
+        exit();
+    } else {
+        $erro = "Credenciais inválidas";
+    }
+}
+
+// Gerar e armazenar token CSRF
+$token = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] = $token;
+?>
+
+<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+    <input type="text" name="username" placeholder="Username" required><br>
+    <input type="password" name="senha" placeholder="Senha" required><br>
+    <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
+    <input type="submit" value="Login">
+</form>
+
+<?php
+if (isset($erro)) {
+    echo $erro;
+}
+?>
+```
+
