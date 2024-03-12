@@ -163,3 +163,15 @@ if (isset($erro)) {
 ?>
 ```
 
+Abaixo algums sistemas desenvolvidos por mim utilizando estas regras
+
+[https://painel.finderit.com.br](https://painel.finderit.com.br) - Plataforma de gestão de prestadores de serviços com abertura de tickets, modulos de pagamento, gestao de sprints e projetos
+
+
+[https://robodaloto.com.br](https://robodaloto.com.br) - Plataforma de geração de probabilidades de jogos lotericos utilizando regras matematicas e estatisticas em fibonacci
+
+[https://radarimobiliariosp.com.br/painel/](https://radarimobiliariosp.com.br/painel/) - Plataormaa de pesquisa de dados de imóveis
+
+
+
+
